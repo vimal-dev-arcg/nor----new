@@ -6,10 +6,10 @@ export default function CategorizedProjectsSection() {
   const [activeTab, setActiveTab] = useState("residential");
 
   const categories = [
-    { id: "residential", label: "Residential", tag: "Sobha • Damac • Emaar" },
-    { id: "commercial", label: "Commercial", tag: "Motor City & Burj Capital" },
-    { id: "community", label: "Community Living", tag: "Modon • Ohana • RAK" },
-    { id: "all", label: "All Developments", tag: "9 Projects" },
+    { id: "residential", label: "Residential", tag: "Mercedes • SOBHA • Damac" },
+    { id: "commercial", label: "Commercial", tag: "O1NE • Lumena • Burj Capital" },
+    { id: "community", label: "Community Living", tag: "Modon • Bayn-ORA • Sobha City" },
+    { id: "all", label: "All Developments", tag: "9 Developments" },
   ];
 
   return (
@@ -24,9 +24,18 @@ export default function CategorizedProjectsSection() {
           <span className="text-xs font-bold uppercase tracking-[0.25em] text-[#b3975b] block mb-2">
             Featured Portfolio
           </span>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-5">
-            Curated Dubai & UAE Developments
-          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+              Curated Dubai & UAE Developments
+            </h2>
+            <Link
+              to="/new-launch"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#b3975b] hover:text-[#967d46] transition group shrink-0"
+            >
+              <span>Explore All New Launches (9+)</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </Link>
+          </div>
 
           {/* Category Filter Pills */}
           <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto pb-2 scrollbar-none flex-wrap">
@@ -65,7 +74,7 @@ export default function CategorizedProjectsSection() {
                   Residential Developments
                 </h3>
                 <span className="text-xs font-semibold text-slate-500 bg-slate-200/70 px-2.5 py-1 rounded-full">
-                  Sobha | Damac | Emaar
+                  Mercedes by Binghatti | SOBHA Central | Damac - Chelsea Residence
                 </span>
               </div>
               <Link
@@ -85,7 +94,7 @@ export default function CategorizedProjectsSection() {
           </div>
         )}
 
-        {/* 2. COMMERCIAL CAROUSEL (O1NE- Motor City | Capital One –Motor City | Burj Capital) */}
+        {/* 2. COMMERCIAL CAROUSEL (O1NE in Motor City | Lumena by Omniyat | Burj Capital by Centurion) */}
         {(activeTab === "all" || activeTab === "commercial") && (
           <div className="mb-16">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 border-b border-slate-200 pb-3">
@@ -95,7 +104,7 @@ export default function CategorizedProjectsSection() {
                   Commercial Developments
                 </h3>
                 <span className="text-xs font-semibold text-slate-500 bg-slate-200/70 px-2.5 py-1 rounded-full">
-                  O1NE - Motor City | Capital One – Motor City | Burj Capital
+                  O1NE in Motor City | Lumena by Omniyat | Burj Capital by Centurion
                 </span>
               </div>
               <Link
@@ -115,7 +124,7 @@ export default function CategorizedProjectsSection() {
           </div>
         )}
 
-        {/* 3. COMMUNITY PROJECTS CAROUSEL (Modon | Ohana/Imkan | RAK) */}
+        {/* 3. COMMUNITY PROJECTS CAROUSEL (Modon - Wadeem Gardens | Bayn- ORA | Sobha City - Abu Dhabi) */}
         {(activeTab === "all" || activeTab === "community") && (
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 border-b border-slate-200 pb-3">
@@ -125,7 +134,7 @@ export default function CategorizedProjectsSection() {
                   Community Projects
                 </h3>
                 <span className="text-xs font-semibold text-slate-500 bg-slate-200/70 px-2.5 py-1 rounded-full">
-                  Modon | Ohana / Imkan | RAK
+                  Modon - Wadeem Gardens | Bayn- ORA | Sobha City - Abu Dhabi
                 </span>
               </div>
               <Link
@@ -153,14 +162,18 @@ function ProjectCard({ project, isCommercial = false }) {
   return (
     <div className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
       {/* Image Banner */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
         <img
-          src={project.images[0]}
+          src={project.images[0] || "/projects/mercedes_1.jpg"}
           alt={project.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           loading="lazy"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/projects/mercedes_1.jpg";
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/30" />
 
         {/* Top Badges */}
         <div className="absolute top-3.5 left-3.5 flex items-center gap-2">

@@ -116,11 +116,11 @@ export default function Header() {
             <nav className="flex items-center gap-4 xl:gap-6 text-[12px] xl:text-[13px] uppercase tracking-[0.2em] xl:tracking-widest leading-none">
               {/* 1) New Launch */}
               <NavLink
-      to="/new-launch" // Updated to use the new route
-      className={baseLink}
-    >
-      New Launch
-    </NavLink>
+                to="/new-launch"
+                className={navClass}
+              >
+                NEW LAUNCH
+              </NavLink>
 
               {/* 2) BUY/SELL dropdown */}
               <div
@@ -181,7 +181,12 @@ export default function Header() {
                 )} */}
               </div>
 
-              {/* 3) BLOGS */}
+              {/* 3) GALLERY */}
+              <NavLink to="/gallery" className={navClass}>
+                GALLERY
+              </NavLink>
+
+              {/* 4) BLOGS */}
               <NavLink to="/blog" className={navClass}>
                 BLOGS
               </NavLink>
@@ -384,30 +389,19 @@ export default function Header() {
             <div className="p-6 sm:p-8 overflow-auto flex-1">
               <nav className="flex flex-col gap-4 text-base font-medium">
                 {/* 1) New Launch */}
-                <a
-                  href="/#latest-launches"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpen(false);
-                    if (pathname === "/") {
-                      const el =
-                        document.getElementById("latest-launches") ||
-                        document.getElementById("new-launches");
-                      if (el) {
-                        const y =
-                          el.getBoundingClientRect().top +
-                          window.pageYOffset -
-                          96;
-                        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-                      }
-                    } else {
-                      navigate("/#latest-launches");
-                    }
-                  }}
-                  className="py-1 text-slate-800 hover:text-[#b3975b] font-semibold text-sm uppercase tracking-wider"
+                <NavLink
+                  to="/new-launch"
+                  onClick={() => setOpen(false)}
+                  className={({ isActive }) =>
+                    `py-1 font-semibold text-sm uppercase tracking-wider transition ${
+                      isActive
+                        ? "text-[#b3975b]"
+                        : "text-slate-800 hover:text-[#b3975b]"
+                    }`
+                  }
                 >
-                  New Launch
-                </a>
+                  NEW LAUNCH
+                </NavLink>
 
                 {/* 2) BUY/SELL */}
                 <div>
@@ -444,7 +438,16 @@ export default function Header() {
                   </div>
                 </div>
 
-                {/* 3) BLOGS */}
+                {/* 3) GALLERY */}
+                <NavLink
+                  to="/gallery"
+                  className={navClass}
+                  onClick={() => setOpen(false)}
+                >
+                  GALLERY
+                </NavLink>
+
+                {/* 4) BLOGS */}
                 <NavLink
                   to="/blog"
                   className={navClass}

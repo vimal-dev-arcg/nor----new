@@ -8,7 +8,7 @@ import PropertyCard from "../components/PropertyCard";
 import LatestLaunchesCarousel from "../components/LatestLaunchesCarousel";
 import CategorizedProjectsSection from "../components/CategorizedProjectsSection";
 
-import discreetImg from "../img/trust/Discreet.png";
+import discreetImg from "../img/trust/Discreet.jpeg";
 import dataDriveImg from "../img/trust/datadrive.webp";
 import internationalImg from "../img/trust/longterm.jpg";
 import upwardTrendImg from "../img/trust/upward-trend.svg";

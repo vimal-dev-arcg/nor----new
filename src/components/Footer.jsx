@@ -124,6 +124,12 @@ export default function Footer() {
             {[
               { label: "Home", to: "/", onClick: goToPageTop("/") },
               {
+                label: "New Launch Projects",
+                to: "/new-launch",
+                onClick: goToPageTop("/new-launch"),
+                highlight: true,
+              },
+              {
                 label: "Buy / Sell",
                 to: "/sell-or-rent-out-property",
                 onClick: goToPageTop("/sell-or-rent-out-property"),
@@ -143,6 +149,11 @@ export default function Footer() {
                 to: "/india",
                 onClick: goToPageTop("/india"),
                 highlight: true,
+              },
+              {
+                label: "Photo Gallery",
+                to: "/gallery",
+                onClick: goToPageTop("/gallery"),
               },
               { label: "Blog", to: "/blog", onClick: goToPageTop("/blog") },
               { label: "FAQs", to: "/about#faq", onClick: goToPageTop("/about") },
@@ -174,6 +185,7 @@ export default function Footer() {
             {[
               { label: "About NCR Properties", to: "/about" },
               { label: "Our Team", to: "/agents" },
+              { label: "Internship Program", to: "/agents" },
               { label: "Careers", to: "/career" },
               { label: "Contact", to: "/contact" },
             ].map((item, idx) => (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PropertyCard from "../components/PropertyCard";
@@ -38,6 +38,9 @@ export default function Listings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const modeFromUrl = searchParams.get("mode") || ""; // Buy | Rent | Sell | ""
   const categoryFromUrl = searchParams.get("category") || ""; // Residential | Commercial | Community | ""
+
+  const statusFromUrl = searchParams.get("status") || "";
+  const isNewLaunch = modeFromUrl === "New Launch" || statusFromUrl.toLowerCase().includes("launch");
 
   const [filters, setFilters] = useState({
     type: "",
@@ -102,7 +105,15 @@ export default function Listings() {
       const minBeds = filters.beds ? Number(filters.beds) : null;
       const maxPrice = filters.maxPrice ? Number(filters.maxPrice) : null;
 
-      const passMode = !modeFromUrl || p.mode === modeFromUrl;
+      let passMode = true;
+      if (isNewLaunch) {
+        passMode =
+          p.status === "New Launch" ||
+          p.type === "Off-Plan" ||
+          p.status?.toLowerCase().includes("launch");
+      } else if (modeFromUrl) {
+        passMode = p.mode === modeFromUrl;
+      }
       const passType = !filters.type || p.type === filters.type;
       const passBeds = !minBeds || Number(p.beds || 0) >= minBeds;
       const passPrice = !maxPrice || Number(p.price || 0) <= maxPrice;
@@ -127,7 +138,7 @@ export default function Listings() {
 
       return passMode && passType && passBeds && passPrice && passCategory;
     });
-  }, [properties, filters, modeFromUrl, categoryFromUrl]);
+  }, [properties, filters, modeFromUrl, categoryFromUrl, isNewLaunch]);
 
   function setMode(nextMode) {
     const next = {};
@@ -256,18 +267,39 @@ export default function Listings() {
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-1">
                 Mode:
               </span>
-              {["Buy", "Sell", "Rent"].map((m) => (
+              {["Buy", "Sell", "Rent", "New Launch"].map((m) => (
                 <Pill
                   key={m}
-                  active={modeFromUrl === m}
+                  active={
+                    m === "New Launch"
+                      ? isNewLaunch
+                      : modeFromUrl === m && !isNewLaunch
+                  }
                   onClick={() => setMode(m)}
                 >
-                  {m}
+                  {m === "New Launch" ? "⚡ New Launch" : m}
                 </Pill>
               ))}
-              <Pill active={!modeFromUrl} onClick={() => setMode("")}>
+              <Pill active={!modeFromUrl && !isNewLaunch} onClick={() => setMode("")}>
                 ALL
               </Pill>
+            </div>
+
+            {/* Quick Banner for New Launches */}
+            <div className="mt-4 p-3.5 bg-gradient-to-r from-[#b3975b]/10 via-[#b3975b]/5 to-transparent border border-[#b3975b]/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-800">
+                <span className="text-base">🚀</span>
+                <span>
+                  Seeking exclusive off-plan releases and direct developer allocations?
+                </span>
+              </div>
+              <Link
+                to="/new-launch"
+                className="font-bold text-[#b3975b] hover:text-[#967d46] whitespace-nowrap flex items-center gap-1 group"
+              >
+                <span>View All New Launch Developments (9+)</span>
+                <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+              </Link>
             </div>
 
             {/* Category pills */}

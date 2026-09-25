@@ -737,6 +737,20 @@ Key Knowledge Base & Market Grounding:
    - Bangalore (Indiranagar, Whitefield, tech corridor eco villas).
    - Full FEMA compliance, NRE/NRO banking repatriation guidance.
 
+5. Featured New Off-Plan Launches (2026-2028):
+   - Residential:
+     • Mercedes by Binghatti (Downtown Dubai): 65-storey branded tower, private sky pools, acoustic lounges, starting AED 8.8M. Handover Q4 2026.
+     • SOBHA Central (Sheikh Zayed Road / Downtown Corridor): Signature German precision finishes, skyline infinity pool, starting AED 2.85M. Handover Q4 2027.
+     • Damac - Chelsea Residence (Dubai Maritime City / Al Safa): British heritage luxury waterfront residences, private marina access, starting AED 2.15M. Handover Q1 2028.
+   - Commercial:
+     • O1NE in Motor City: Grade-A futuristic commercial offices and collaborative retail pavilions, high yields (8.5%+), starting AED 1.65M. Handover Q3 2027.
+     • Lumena by Omniyat (Marasi Bay Marina, Business Bay): Ultra-prime sculptural commercial tower, corporate HQs, canal-front executive boardrooms, private yacht berths, starting AED 3.2M. Handover Q2 2027.
+     • Burj Capital by Centurion (Business Bay / Downtown): Institutional corporate tower for family offices & funds, starting AED 2.75M. Handover Q1 2028.
+   - Community Living:
+     • Modon - Wadeem Gardens (Hudayriyat Island, Abu Dhabi): Biophilic garden villas, organic greenery, cycling paths, nature trails, sports hubs, starting AED 4.4M. Handover Q4 2027.
+     • Bayn- ORA (Sahel Al Emarat / Ghantoot): Serene coastal sanctuary by Naguib Sawiris's ORA, private swimmable beach access, tranquil lagoons, sports clubs, starting AED 3.85M. Handover Q2 2028.
+     • Sobha City - Abu Dhabi (Al Siniya Island, Abu Dhabi): Island waterfront metropolis, natural mangrove lagoons, 18-hole championship golf links, starting AED 3.6M. Handover Q3 2028.
+
 Tone & Style:
 - Highly professional, analytical, concise, confident, and polite.
 - When formatting text, use clean line breaks, standard bullet points (•), and avoid excessive bold asterisks (**) or markdown clumping so the response reads cleanly on mobile and desktop.
@@ -810,6 +824,18 @@ Tone & Style:
           ) {
             reply =
               "🇮🇳 **NCR Properties NRI Advisory Desk**:\n\nWe provide overseas Indians and international investors turnkey acquisition, title verification, and portfolio management across:\n• **Delhi NCR**: Golf Course Road & Cyber City luxury sky mansions (₹4 Cr – ₹25 Cr)\n• **Tricity**: Chandigarh • Panchkula • Mohali luxury corridor & airport express villas (₹2 Cr – ₹8 Cr)\n• **Bangalore**: Indiranagar & Whitefield tech corridor eco villas (₹1.9 Cr – ₹6 Cr)\n\nWe provide full FEMA compliance, NRE/NRO repatriable banking support, and local tenancy management.";
+          } else if (
+            msg.includes("launch") ||
+            msg.includes("new project") ||
+            msg.includes("mercedes") ||
+            msg.includes("chelsea") ||
+            msg.includes("lumena") ||
+            msg.includes("wadeem") ||
+            msg.includes("bayn") ||
+            msg.includes("o1ne")
+          ) {
+            reply =
+              "🌟 **Latest UAE New Launch Portfolio**:\n\n**Residential**:\n• **Mercedes by Binghatti** (Downtown Dubai) — 65-storey branded tower, private sky pools (AED 8.8M+)\n• **SOBHA Central** (Sheikh Zayed Road / Downtown Corridor) — Signature German precision, infinity pool (AED 2.85M+)\n• **Damac - Chelsea Residence** (Maritime City / Al Safa) — British waterfront elegance, marina views (AED 2.15M+)\n\n**Commercial**:\n• **O1NE in Motor City** — Grade-A futuristic commercial offices (AED 1.65M+)\n• **Lumena by Omniyat** (Marasi Bay Marina) — Ultra-prime sculptural commercial tower (AED 3.2M+)\n• **Burj Capital by Centurion** (Business Bay) — Institutional corporate headquarters (AED 2.75M+)\n\n**Community Living**:\n• **Modon - Wadeem Gardens** (Hudayriyat Island, Abu Dhabi) — Biophilic garden villas (AED 4.4M+)\n• **Bayn- ORA** (Ghantoot Coastal Sanctuary) — Coastal sanctuary by ORA (AED 3.85M+)\n• **Sobha City - Abu Dhabi** (Al Siniya Island) — Waterfront island metropolis & golf (AED 3.6M+)\n\nWould you like full brochures, payment milestone plans, or unit layouts for any of these developments?";
           }
 
           return sendJson(res, 200, { reply, message: reply });

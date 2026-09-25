@@ -13,6 +13,7 @@ import Commercial from "./pages/Commercial";
 import BlogIndex from "./pages/Blogs/BlogIndex";
 import BlogPost from "./pages/Blogs/BlogPost";
 import Career from "./pages/Career";
+import Gallery from "./pages/Gallery";
 
 import Admin from "./pages/Admin/Admin";
 import AdminPropertyListings from "./pages/Admin/AdminPropertyListings";
@@ -20,7 +21,7 @@ import AdminAllProperties from "./pages/Admin/AdminAllProperties";
 import AdminInquiries from "./pages/Admin/AdminInquiries";
 import FloatingActionDesk from "./components/FloatingActionDesk";
 
-import NewLaunch from "./components/LatestLaunchesCarousel"
+import NewLaunchPage from "./pages/NewLaunchPage";
 
 // Specialized Role Dashboards
 import BuyerDashboard from "./pages/Dashboards/BuyerDashboard";
@@ -57,10 +58,10 @@ export default function App() {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/commercial" element={<Commercial />} />
         <Route path="/career" element={<Career />} />
+        <Route path="/gallery" element={<Gallery />} />
         <Route path="/sell-or-rent-out-property" element={<Listings />} />
         <Route path="/india" element={<IndiaListings />} />
-        <Route path="/new-launch" element={<NewLaunch />} /> {/* New Launch Route */}
-
+        <Route path="/new-launch" element={<NewLaunchPage />} />
 
         {/* Authentication */}
         <Route path="/login" element={<Login />} />
