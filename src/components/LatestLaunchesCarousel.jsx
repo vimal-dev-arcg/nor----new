@@ -109,8 +109,6 @@ export default function LatestLaunchesCarousel() {
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.12] mb-5 sm:mb-6 drop-shadow-xl max-w-2xl">
             <Link
               to={`/projects/${current.slug}`}
-              target="_blank"
-              rel="noreferrer"
               className="hover:text-[#e6ca85] transition-colors focus:outline-none"
               title={current.title}
             >
@@ -122,8 +120,6 @@ export default function LatestLaunchesCarousel() {
           <div className="mb-6 sm:mb-8">
             <Link
               to={`/projects/${current.slug}`}
-              target="_blank"
-              rel="noreferrer"
               className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-[#b3975b] hover:bg-[#c4a96e] text-slate-950 font-bold text-sm sm:text-base shadow-xl shadow-[#b3975b]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               View More

@@ -225,6 +225,10 @@ export default function Property() {
   const [galleryActiveIdx, setGalleryActiveIdx] = useState(0);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id, slug]);
+
+  useEffect(() => {
     let cancelled = false;
 
     async function load() {

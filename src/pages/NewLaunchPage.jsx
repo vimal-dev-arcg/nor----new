@@ -550,8 +550,6 @@ export default function NewLaunchPage() {
                       {/* Property Image Showcase */}
                       <Link
                         to={`/projects/${project.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
                         className="block relative aspect-[16/10] overflow-hidden bg-slate-900 group-hover:opacity-95 transition"
                         title={`View ${project.title}`}
                       >
@@ -607,7 +605,7 @@ export default function NewLaunchPage() {
                           </div>
 
                           <h3 className="text-xl font-bold text-slate-900 group-hover:text-[#b3975b] transition line-clamp-1 mb-2">
-                            <Link to={`/projects/${project.slug}`} target="_blank" rel="noreferrer">
+                            <Link to={`/projects/${project.slug}`}>
                               {project.title}
                             </Link>
                           </h3>
@@ -673,8 +671,6 @@ export default function NewLaunchPage() {
                           <div className="grid grid-cols-2 gap-2">
                             <Link
                               to={`/projects/${project.slug}`}
-                              target="_blank"
-                              rel="noreferrer"
                               className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-[#b3975b] text-white hover:text-slate-950 font-bold text-xs transition shadow"
                             >
                               <span>View Project</span>

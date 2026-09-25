@@ -164,8 +164,6 @@ function ProjectCard({ project, isCommercial = false }) {
       {/* Image Banner */}
       <Link
         to={`/projects/${project.slug}`}
-        target="_blank"
-        rel="noreferrer"
         className="block relative aspect-[16/10] overflow-hidden bg-slate-900 group-hover:opacity-95 transition"
         title={`Explore ${project.title}`}
       >
@@ -207,7 +205,7 @@ function ProjectCard({ project, isCommercial = false }) {
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>
           <h4 className="text-lg font-bold text-slate-900 group-hover:text-[#b3975b] transition line-clamp-1 mb-2">
-            <Link to={`/projects/${project.slug}`} target="_blank" rel="noreferrer">
+            <Link to={`/projects/${project.slug}`}>
               {project.title}
             </Link>
           </h4>
@@ -280,8 +278,6 @@ function ProjectCard({ project, isCommercial = false }) {
 
             <Link
               to={`/projects/${project.slug}`}
-              target="_blank"
-              rel="noreferrer"
               className="px-4 py-2.5 rounded-xl bg-slate-900 group-hover:bg-[#b3975b] text-white group-hover:text-slate-950 font-bold text-xs transition-all shadow hover:shadow-md flex items-center gap-1.5"
             >
               <span>View Details</span>
