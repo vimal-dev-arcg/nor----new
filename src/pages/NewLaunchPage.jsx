@@ -548,7 +548,13 @@ export default function NewLaunchPage() {
                       className="group bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden"
                     >
                       {/* Property Image Showcase */}
-                      <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
+                      <Link
+                        to={`/projects/${project.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block relative aspect-[16/10] overflow-hidden bg-slate-900 group-hover:opacity-95 transition"
+                        title={`View ${project.title}`}
+                      >
                         <img
                           src={project.images?.[0] || "/projects/mercedes_1.jpg"}
                           alt={project.title}
@@ -590,7 +596,7 @@ export default function NewLaunchPage() {
                             <span>{project.handover}</span>
                           </span>
                         </div>
-                      </div>
+                      </Link>
 
                       {/* Content Body */}
                       <div className="p-6 flex-1 flex flex-col justify-between">
@@ -601,7 +607,9 @@ export default function NewLaunchPage() {
                           </div>
 
                           <h3 className="text-xl font-bold text-slate-900 group-hover:text-[#b3975b] transition line-clamp-1 mb-2">
-                            <Link to={`/projects/${project.slug}`}>{project.title}</Link>
+                            <Link to={`/projects/${project.slug}`} target="_blank" rel="noreferrer">
+                              {project.title}
+                            </Link>
                           </h3>
 
                           <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-4">
@@ -665,6 +673,8 @@ export default function NewLaunchPage() {
                           <div className="grid grid-cols-2 gap-2">
                             <Link
                               to={`/projects/${project.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
                               className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-[#b3975b] text-white hover:text-slate-950 font-bold text-xs transition shadow"
                             >
                               <span>View Project</span>

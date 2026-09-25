@@ -162,7 +162,13 @@ function ProjectCard({ project, isCommercial = false }) {
   return (
     <div className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
       {/* Image Banner */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
+      <Link
+        to={`/projects/${project.slug}`}
+        target="_blank"
+        rel="noreferrer"
+        className="block relative aspect-[16/10] overflow-hidden bg-slate-900 group-hover:opacity-95 transition"
+        title={`Explore ${project.title}`}
+      >
         <img
           src={project.images[0] || "/projects/mercedes_1.jpg"}
           alt={project.title}
@@ -195,13 +201,15 @@ function ProjectCard({ project, isCommercial = false }) {
             {project.handover}
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* Content Body */}
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>
           <h4 className="text-lg font-bold text-slate-900 group-hover:text-[#b3975b] transition line-clamp-1 mb-2">
-            <Link to={`/projects/${project.slug}`}>{project.title}</Link>
+            <Link to={`/projects/${project.slug}`} target="_blank" rel="noreferrer">
+              {project.title}
+            </Link>
           </h4>
           <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-4">
             {project.subtitle}
@@ -272,6 +280,8 @@ function ProjectCard({ project, isCommercial = false }) {
 
             <Link
               to={`/projects/${project.slug}`}
+              target="_blank"
+              rel="noreferrer"
               className="px-4 py-2.5 rounded-xl bg-slate-900 group-hover:bg-[#b3975b] text-white group-hover:text-slate-950 font-bold text-xs transition-all shadow hover:shadow-md flex items-center gap-1.5"
             >
               <span>View Details</span>

@@ -86,6 +86,101 @@ function toGoogleDriveDirectDownload(url) {
   return s;
 }
 
+function normalizeProjectData(raw) {
+  if (!raw) return null;
+  const p = { ...raw };
+  const rawAmenities = Array.isArray(p.amenities) ? p.amenities : [];
+  const rawFloorPlans = Array.isArray(p.floorPlans)
+    ? p.floorPlans
+    : Array.isArray(p.project?.floorPlans)
+    ? p.project.floorPlans
+    : [];
+  const rawImages =
+    Array.isArray(p.images) && p.images.length
+      ? p.images
+      : Array.isArray(p.project?.images)
+      ? p.project.images
+      : [];
+
+  const projectObj = {
+    projectName: p.project?.projectName || p.title || "Project",
+    heroTitle: p.project?.heroTitle || p.title || "Project",
+    developer: p.project?.developer || p.developer || "Premier UAE Developer",
+    location: p.project?.location || p.location || "Dubai, UAE",
+    startingPrice:
+      p.project?.startingPrice ||
+      p.displayPrice ||
+      (p.price ? `AED ${p.price.toLocaleString()}` : "Price on request"),
+    paymentPlan:
+      p.project?.paymentPlan || p.paymentPlan || "Construction Linked",
+    handover: p.project?.handover || p.handover || "Q4 2026",
+    about: p.project?.about || p.description || p.subtitle || "",
+    concept: p.project?.concept || p.subtitle || "",
+    brochureUrl: p.project?.brochureUrl || p.brochureUrl || "",
+    floorplanPdfUrl: p.project?.floorplanPdfUrl || p.brochureUrl || "",
+    floorPlans: rawFloorPlans,
+    unitTypes:
+      p.project?.unitTypes ||
+      (p.beds ? `${p.beds} Bedrooms` : "Luxury Residences"),
+    amenityWellness: p.project?.amenityWellness?.length
+      ? p.project.amenityWellness
+      : rawAmenities.length
+      ? rawAmenities.slice(0, 4)
+      : ["Infinity Pool", "State-of-the-Art Gym", "Spa & Sauna", "Yoga Deck"],
+    amenitySocial: p.project?.amenitySocial?.length
+      ? p.project.amenitySocial
+      : rawAmenities.length > 4
+      ? rawAmenities.slice(4, 8)
+      : [
+          "Private Resident Lounge",
+          "Concierge Service",
+          "Outdoor Cinema",
+          "Landscaped Gardens",
+        ],
+    amenitySmart: p.project?.amenitySmart?.length
+      ? p.project.amenitySmart
+      : rawAmenities.length > 8
+      ? rawAmenities.slice(8)
+      : [
+          "Smart Home Automation",
+          "EV Charging Stations",
+          "24/7 Security",
+          "Valet Parking",
+        ],
+    paymentPlanSteps: p.project?.paymentPlanSteps?.length
+      ? p.project.paymentPlanSteps
+      : String(p.paymentPlan || "").includes("70/30")
+      ? ["20% On Booking", "50% During Construction", "30% On Handover"]
+      : String(p.paymentPlan || "").includes("60/40")
+      ? ["20% Down Payment", "40% During Construction", "40% On Handover"]
+      : String(p.paymentPlan || "").includes("50/50")
+      ? ["20% Down Payment", "30% During Construction", "50% On Handover"]
+      : ["20% On Booking", "50% During Construction", "30% On Handover"],
+    driveTimes: p.project?.driveTimes?.length
+      ? p.project.driveTimes
+      : [
+          { time: "5 Mins", place: "Downtown Dubai & Burj Khalifa" },
+          {
+            time: "10 Mins",
+            place: "Dubai International Financial Centre (DIFC)",
+          },
+          { time: "15 Mins", place: "Dubai International Airport (DXB)" },
+          { time: "20 Mins", place: "Palm Jumeirah & Dubai Marina" },
+        ],
+    ...p.project,
+  };
+
+  return {
+    ...p,
+    title: p.title || projectObj.projectName,
+    location: p.location || projectObj.location,
+    displayPrice: p.displayPrice || projectObj.startingPrice,
+    images: rawImages,
+    floorPlans: rawFloorPlans,
+    project: projectObj,
+  };
+}
+
 export default function Property() {
   const { id, slug } = useParams();
   const navigate = useNavigate();
@@ -136,6 +231,7 @@ export default function Property() {
       try {
         setError("");
         setLoading(true);
+        let found = null;
 
         // Check new off-plan launches & categorized projects first
         const allNewLaunches = [
@@ -147,7 +243,8 @@ export default function Property() {
         const searchKey = String(id || slug || "");
         found = allNewLaunches.find((p) => {
           const pId = String(p.id ?? "");
-          const pSlug = p.slug || slugify(p.project?.projectName || p.title || "");
+          const pSlug =
+            p.slug || slugify(p.project?.projectName || p.title || "");
           return (
             pId === searchKey ||
             pSlug === searchKey ||
@@ -178,7 +275,8 @@ export default function Property() {
           const storeProps = appStore.getState().properties || [];
           found = storeProps.find((p) => {
             const pId = String(p.id ?? p._id ?? "");
-            const pSlug = p.slug || slugify(p.project?.projectName || p.title || "");
+            const pSlug =
+              p.slug || slugify(p.project?.projectName || p.title || "");
             return (
               pId === searchKey ||
               pSlug === searchKey ||
@@ -189,7 +287,7 @@ export default function Property() {
         }
 
         if (!found) throw new Error("Property listing not found");
-        if (!cancelled) setProperty(found);
+        if (!cancelled) setProperty(normalizeProjectData(found));
       } catch (err) {
         if (!cancelled) {
           setProperty(null);
@@ -204,6 +302,7 @@ export default function Property() {
 
     const unsub = appStore.subscribe((state) => {
       if (cancelled) return;
+      // Only merge if not an off-plan launch or already loaded
       const storeProps = state.properties || [];
       const searchKey = String(id || slug || "");
       const found = storeProps.find((p) => {
@@ -217,7 +316,7 @@ export default function Property() {
         );
       });
       if (found) {
-        setProperty((prev) => ({ ...prev, ...found }));
+        setProperty((prev) => (prev ? { ...prev, ...normalizeProjectData(found) } : normalizeProjectData(found)));
       }
     });
 
