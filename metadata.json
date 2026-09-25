@@ -1,0 +1,6 @@
+{
+  "name": "NCR Properties",
+  "description": "Premium Dubai & India real estate advisory, property listings, and portfolio management platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
