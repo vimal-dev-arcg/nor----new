@@ -121,6 +121,16 @@ propertiesRouter.get("/", async (req: Request, res: Response) => {
   return res.status(200).json(result);
 });
 
+// GET /api/properties/kyc-queue
+propertiesRouter.get("/kyc-queue", async (_req: Request, res: Response) => {
+  return res.status(200).json([]);
+});
+
+// GET /api/properties/escrow-ledger
+propertiesRouter.get("/escrow-ledger", async (_req: Request, res: Response) => {
+  return res.status(200).json([]);
+});
+
 // GET /api/properties/by-slug/:slug
 propertiesRouter.get("/by-slug/:slug", async (req: Request, res: Response) => {
   const slug = decodeURIComponent(req.params.slug);

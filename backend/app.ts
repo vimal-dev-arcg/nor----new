@@ -9,8 +9,21 @@ import { aiRouter } from "./routes/ai";
 
 export const backendApp = express();
 
-// Middleware
-backendApp.use(cors());
+// Enable CORS for separate frontend development (Vite on :5173, etc.)
+backendApp.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      // Allow localhost on any port (5173, 3000, 5050, etc.) and deployment URLs
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  })
+);
+
 backendApp.use(express.json({ limit: "50mb" }));
 backendApp.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
@@ -20,7 +33,11 @@ backendApp.use("/uploads", express.static(uploadsDir));
 
 // Health check endpoint
 backendApp.get("/api/health", (_req, res) => {
-  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: "ok",
+    port: process.env.BACKEND_PORT || process.env.PORT || 5050,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Mount specialized routers
@@ -35,4 +52,3 @@ backendApp.use("/api/ai", aiRouter);
 backendApp.use("/api", (req, res) => {
   res.status(404).json({ error: `Cannot ${req.method} ${req.originalUrl}` });
 });
-

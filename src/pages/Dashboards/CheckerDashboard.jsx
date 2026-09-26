@@ -31,7 +31,7 @@ import {
 } from "react-icons/fa";
 
 export default function CheckerDashboard() {
-  const API_BASE = import.meta.env.VITE_API_BASE;
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE || "";
   const [store, setStore] = useState(appStore.getState());
   const currentUser = PERSONAS.checker;
   const navigate = useNavigate();
@@ -65,7 +65,7 @@ export default function CheckerDashboard() {
     async function fetchData() {
       try {
         // Fetch properties
-        const propertiesRes = await fetch(`${API_BASE}/properties`);
+        const propertiesRes = await fetch(`${API_BASE}/api/properties`);
         if (!propertiesRes.ok) {
           throw new Error(`Failed to fetch properties: ${propertiesRes.status}`);
         }
@@ -73,7 +73,7 @@ export default function CheckerDashboard() {
         setProperties(propertiesData);
   
         // Fetch KYC queue
-        const kycRes = await fetch(`${API_BASE}/properties/kyc-queue`);
+        const kycRes = await fetch(`${API_BASE}/api/properties/kyc-queue`);
         if (!kycRes.ok) {
           console.warn(`KYC queue not found: ${kycRes.status}`);
           setKycQueue([]); // Set an empty array if no data
@@ -83,7 +83,7 @@ export default function CheckerDashboard() {
         }
   
         // Fetch escrow ledger
-        const escrowRes = await fetch(`${API_BASE}/properties/escrow-ledger`);
+        const escrowRes = await fetch(`${API_BASE}/api/properties/escrow-ledger`);
         if (!escrowRes.ok) {
           console.warn(`Escrow ledger not found: ${escrowRes.status}`);
           setEscrowLedger([]); // Set an empty array if no data
