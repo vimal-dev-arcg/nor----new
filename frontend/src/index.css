@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- GLOBAL RESET ---------- */
+html body{
+  scroll-behavior: smooth;
+  width: 100%;
+  overflow-x: hidden;
+  @apply bg-white text-slate-800 antialiased;
+}
+
+/* ---------- REUSABLE COMPONENTS ---------- */
+@layer components {
+
+  /* Container */
+  .container {
+    @apply max-w-7xl mx-auto px-6;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary text-white px-6 py-3 rounded-full
+           font-medium tracking-wide
+           hover:bg-black transition;
+  }
+
+  .btn-outline {
+    @apply border border-gold text-gold px-6 py-3 rounded-full
+           hover:bg-gold hover:text-white transition;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full border border-slate-300 rounded-lg px-4 py-3
+           focus:outline-none focus:ring-2 focus:ring-primary;
+  }
+
+  /* Section spacing */
+  .section {
+    @apply py-24;
+  }
+
+  /* Headings */
+  .heading-xl {
+    @apply text-5xl md:text-6xl font-semibold tracking-tight;
+  }
+
+  .heading-lg {
+    @apply text-4xl font-semibold;
+  }
+
+  .heading-md {
+    @apply text-2xl font-semibold;
+  }
+}
+
+/* ===== Partner Marquee ===== */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee {
+  overflow: hidden;
+  position: relative;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Home Page Hero Carousel Spacing Adjustment */
+@media (min-width: 640px) {
+  .sm\:py-14 {
+    padding-top: 16.5rem;
+    padding-bottom: 3.5rem;
+  }
+}
+
+
