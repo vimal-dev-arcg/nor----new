@@ -27,9 +27,14 @@ backendApp.use(
 backendApp.use(express.json({ limit: "50mb" }));
 backendApp.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// Static uploads directory serving
+// Static uploads directory serving with fallbacks
 const uploadsDir = path.resolve(process.cwd(), "public", "uploads");
+const srcImgDir = path.resolve(process.cwd(), "src", "img");
+const publicImgDir = path.resolve(process.cwd(), "public", "img");
+
 backendApp.use("/uploads", express.static(uploadsDir));
+backendApp.use("/uploads", express.static(srcImgDir));
+backendApp.use("/uploads", express.static(publicImgDir));
 
 // Health check endpoint
 backendApp.get("/api/health", (_req, res) => {

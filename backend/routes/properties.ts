@@ -3,6 +3,7 @@ import { loadProperties, saveProperties } from "../storage";
 import { initialProperties } from "../data/seedData";
 import { PropertyModel } from "../models/Property";
 import { isMongoConnected } from "../db";
+import { requireAuth, AuthRequest } from "../middleware/auth";
 
 export const propertiesRouter = Router();
 
@@ -190,7 +191,7 @@ propertiesRouter.get("/by/:id", async (req: Request, res: Response) => {
 });
 
 // POST /api/properties (Create property)
-propertiesRouter.post("/", async (req: Request, res: Response) => {
+propertiesRouter.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
   const body = req.body || {};
   const maxId = properties.reduce((max, p) => Math.max(max, Number(p.id) || 0), 0);
   const newId = body.id || (maxId > 0 ? maxId + 1 : Date.now());
@@ -225,7 +226,7 @@ propertiesRouter.post("/", async (req: Request, res: Response) => {
 });
 
 // POST /api/properties/:id/approve
-propertiesRouter.post("/:id/approve", async (req: Request, res: Response) => {
+propertiesRouter.post("/:id/approve", requireAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const body = req.body || {};
 
@@ -275,7 +276,7 @@ propertiesRouter.post("/:id/approve", async (req: Request, res: Response) => {
 });
 
 // POST /api/properties/:id/draft
-propertiesRouter.post("/:id/draft", async (req: Request, res: Response) => {
+propertiesRouter.post("/:id/draft", requireAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   if (isMongoConnected()) {
@@ -341,7 +342,7 @@ propertiesRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 // PUT /api/properties/:id
-propertiesRouter.put("/:id", async (req: Request, res: Response) => {
+propertiesRouter.put("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   if (isMongoConnected()) {
@@ -379,7 +380,7 @@ propertiesRouter.put("/:id", async (req: Request, res: Response) => {
 });
 
 // PATCH /api/properties/:id
-propertiesRouter.patch("/:id", async (req: Request, res: Response) => {
+propertiesRouter.patch("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   if (isMongoConnected()) {
@@ -417,7 +418,7 @@ propertiesRouter.patch("/:id", async (req: Request, res: Response) => {
 });
 
 // DELETE /api/properties/:id
-propertiesRouter.delete("/:id", async (req: Request, res: Response) => {
+propertiesRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   if (isMongoConnected()) {

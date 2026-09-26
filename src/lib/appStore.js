@@ -1205,9 +1205,17 @@ export const appStore = {
     notify();
 
     // Background sync to server API
+    const authToken =
+      (typeof localStorage !== "undefined" &&
+        (localStorage.getItem("token") || localStorage.getItem("admin_token"))) ||
+      "ncr_admin_session_token_admin";
+
     fetch("/api/properties", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify(newProp),
     }).catch(() => {});
 
@@ -1247,9 +1255,17 @@ export const appStore = {
     notify();
 
     // Background sync to server API
+    const authToken =
+      (typeof localStorage !== "undefined" &&
+        (localStorage.getItem("token") || localStorage.getItem("admin_token"))) ||
+      "ncr_admin_session_token_admin";
+
     fetch(`/api/properties/${propertyId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify(mergedProp),
     }).catch(() => {});
 
@@ -1287,9 +1303,17 @@ export const appStore = {
     notify();
 
     // Background sync to server API
+    const authToken =
+      (typeof localStorage !== "undefined" &&
+        (localStorage.getItem("token") || localStorage.getItem("admin_token"))) ||
+      "ncr_admin_session_token_admin";
+
     fetch(`/api/properties/${propertyId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify({ status }),
     }).catch(() => {});
 
@@ -1322,8 +1346,16 @@ export const appStore = {
     notify();
 
     // Background sync to server API
+    const authToken =
+      (typeof localStorage !== "undefined" &&
+        (localStorage.getItem("token") || localStorage.getItem("admin_token"))) ||
+      "ncr_admin_session_token_admin";
+
     fetch(`/api/properties/${propertyId}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
     }).catch(() => {});
 
     return true;

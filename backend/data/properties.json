@@ -1,1 +1,128 @@
-[]
+[
+  {
+    "title": "Luxury Penthouse Suite",
+    "price": "AED 8,500,000",
+    "id": 1790430090179,
+    "slug": "luxury-penthouse-suite",
+    "status": "Available",
+    "moderationStatus": "approved",
+    "listedAt": "2026-09-26",
+    "images": [
+      "/src/img/img1.jpg"
+    ],
+    "_id": "prop_1790430090179"
+  },
+  {
+    "title": "Unauthorized Test",
+    "id": 1790430090178,
+    "slug": "unauthorized-test",
+    "status": "Available",
+    "moderationStatus": "approved",
+    "listedAt": "2026-09-26",
+    "images": [
+      "/src/img/img1.jpg"
+    ],
+    "_id": "prop_1790430090178"
+  },
+  {
+    "title": "asd",
+    "slug": "ads",
+    "mode": "Buy",
+    "price": 0,
+    "displayPrice": "Price on request",
+    "location": "",
+    "community": "",
+    "city": "Dubai",
+    "address": "",
+    "type": "Off-Plan",
+    "status": "New Launch",
+    "featuredCategory": "",
+    "beds": "",
+    "baths": "",
+    "areaSqft": "",
+    "parking": "",
+    "furnished": false,
+    "handover": "",
+    "yearBuilt": "",
+    "agentId": "",
+    "lat": "",
+    "lng": "",
+    "listedAt": "2026-09-26",
+    "description": "",
+    "highlightsCsv": "",
+    "project": {
+      "aboutTitle": "",
+      "projectName": "",
+      "developer": "",
+      "architect": "",
+      "location": "",
+      "plotNumber": "",
+      "plotAreaSqft": "",
+      "plotArea": "",
+      "estCompletion": "",
+      "towerHeight": "",
+      "finishing": "",
+      "lobbyCeilingHeightMm": "",
+      "lobbyCeilingHeight": "",
+      "estimatedServiceCharges": "",
+      "numberOfParking": "",
+      "elevatorsCsv": "",
+      "parkingAllocationCsv": "",
+      "reraNumber": "",
+      "totalUnits": "",
+      "branded": "",
+      "anticipatedServiceFees": "",
+      "whiteGoods": "",
+      "brandOfWhiteGoods": "",
+      "sanitaryBrand": "",
+      "masterImage": "",
+      "heroTitle": "",
+      "heroLocation": "",
+      "about": "",
+      "conceptTitle": "",
+      "concept": "",
+      "connectivityText": "",
+      "metaTitle": "",
+      "metaDescription": "",
+      "brochureUrl": "",
+      "floorplanPdfUrl": "",
+      "paymentPlanTitle": "",
+      "paymentPlanStepsCsv": "",
+      "amenityWellnessCsv": "",
+      "amenitySocialCsv": "",
+      "amenitySmartCsv": "",
+      "driveTimesCsv": "",
+      "startingPrice": "",
+      "unitTypes": "",
+      "paymentPlan": "",
+      "handover": ""
+    },
+    "amenities": [
+      {
+        "type": "",
+        "sizeSqft": "",
+        "details": "",
+        "metaJson": ""
+      }
+    ],
+    "floorPlans": [
+      {
+        "label": "",
+        "type": "",
+        "sizeText": "",
+        "unitsCount": "",
+        "sizeMinSqft": "",
+        "sizeMaxSqft": "",
+        "previewSrc": "",
+        "pdfUrl": "",
+        "imagesCsv": ""
+      }
+    ],
+    "id": 1790430090177,
+    "moderationStatus": "approved",
+    "images": [
+      "/src/img/img1.jpg"
+    ],
+    "_id": "prop_1790430090177"
+  }
+]
