@@ -640,13 +640,12 @@ function loadInitialState() {
     const saved = localStorage.getItem(STORE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed && Array.isArray(parsed.properties) && parsed.properties.length > 0) {
-        return parsed;
+      if (parsed) {
+        return {
+          ...parsed,
+          properties: Array.isArray(parsed.properties) ? parsed.properties : [],
+        };
       }
-      return {
-        ...parsed,
-        properties: initialProperties,
-      };
     }
   } catch (e) {
     console.warn("Could not read stored platform state:", e);
@@ -654,7 +653,7 @@ function loadInitialState() {
 
   return {
     currentUserRole: "super_admin",
-    properties: initialProperties,
+    properties: [],
     escrowLedger: initialEscrowLedger,
     visits: initialVisits,
     kycQueue: initialKycQueue,
@@ -1676,7 +1675,7 @@ export const appStore = {
     localStorage.removeItem(STORE_KEY);
     storeState = {
       currentUserRole: "super_admin",
-      properties: initialProperties,
+      properties: [],
       escrowLedger: initialEscrowLedger,
       visits: initialVisits,
       kycQueue: initialKycQueue,
