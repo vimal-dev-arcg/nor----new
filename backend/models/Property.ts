@@ -54,7 +54,7 @@ const PropertySchema = new Schema<IProperty>(
     mode: { type: String, default: "Buy" },
     title: { type: String, required: true },
     slug: { type: String, required: true, index: true },
-    price: { type: Number, default: 0 },
+    price: { type: Schema.Types.Mixed, default: 0 },
     displayPrice: { type: String, default: "" },
     location: { type: String, default: "" },
     community: { type: String, default: "" },

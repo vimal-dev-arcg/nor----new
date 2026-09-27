@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "dev:backend": "tsx backend/standalone.ts",
+    "dev:backend": "tsx backend/server.ts",
     "dev:frontend": "vite --port 5173",
-    "server": "tsx backend/standalone.ts",
+    "server": "tsx backend/server.ts",
     "client": "vite --port 5173",
     "build": "vite build",
     "start": "node server.ts",
