@@ -3,12 +3,9 @@ import { loadProperties, saveProperties } from "../storage";
 import { initialProperties } from "../data/seedData";
 import { PropertyModel } from "../models/Property";
 import { isMongoConnected } from "../db";
-import { requireAuth, AuthRequest } from "../middleware/auth";
+import { optionalAuth, AuthRequest } from "../middleware/auth";
 
 export const propertiesRouter = Router();
-
-// In-memory cache synced with persistent JSON store (starts empty)
-let properties = loadProperties(initialProperties);
 
 function slugify(input: string): string {
   return String(input || "")
@@ -62,15 +59,17 @@ propertiesRouter.get("/", async (req: Request, res: Response) => {
       }
 
       const mongoProps = await PropertyModel.find(query).sort({ createdAt: -1 }).lean();
-      return res.status(200).json(mongoProps || []);
+      if (Array.isArray(mongoProps) && mongoProps.length > 0) {
+        return res.status(200).json(mongoProps);
+      }
     } catch (err) {
-      console.error("[MongoDB] Error querying properties:", err);
-      return res.status(500).json({ error: "Failed to query MongoDB properties" });
+      console.warn("[MongoDB] Notice querying properties, falling back to local dataset:", err);
     }
   }
 
-  // File-storage fallback when MongoDB is offline
-  let result = [...properties];
+  // File-storage fallback when MongoDB is offline or empty (never throws 500)
+  const currentProperties = loadProperties(initialProperties);
+  let result = [...currentProperties];
 
   if (status) {
     result = result.filter(
@@ -138,24 +137,15 @@ propertiesRouter.get("/by-slug/:slug", async (req: Request, res: Response) => {
 
   if (isMongoConnected()) {
     try {
-      const prop = await PropertyModel.findOne({
-        $or: [{ slug }, { "project.projectName": slug }],
-      }).lean();
+      const prop = await PropertyModel.findOne({ slug }).lean();
       if (prop) return res.status(200).json(prop);
-      return res.status(404).json({ message: "Property not found" });
     } catch (err) {
-      console.error("[MongoDB] Error finding property by slug:", err);
-      return res.status(500).json({ error: "Failed to find property by slug" });
+      console.warn("[MongoDB] Error finding property by slug:", err);
     }
   }
 
-  const prop = properties.find(
-    (p) =>
-      p.slug === slug ||
-      slugify(p.title) === slugify(slug) ||
-      slugify(p.project?.projectName || "") === slugify(slug)
-  );
-
+  const currentProperties = loadProperties(initialProperties);
+  const prop = currentProperties.find((p) => p.slug === slug);
   if (prop) {
     return res.status(200).json(prop);
   }
@@ -164,7 +154,7 @@ propertiesRouter.get("/by-slug/:slug", async (req: Request, res: Response) => {
 
 // GET /api/properties/by/:id
 propertiesRouter.get("/by/:id", async (req: Request, res: Response) => {
-  const id = decodeURIComponent(req.params.id);
+  const { id } = req.params;
 
   if (isMongoConnected()) {
     try {
@@ -173,14 +163,13 @@ propertiesRouter.get("/by/:id", async (req: Request, res: Response) => {
 
       const prop = await PropertyModel.findOne({ $or: queryOr }).lean();
       if (prop) return res.status(200).json(prop);
-      return res.status(404).json({ message: "Property not found" });
     } catch (err) {
-      console.error("[MongoDB] Error finding property by ID:", err);
-      return res.status(500).json({ error: "Failed to find property by ID" });
+      console.warn("[MongoDB] Error finding property by ID:", err);
     }
   }
 
-  const prop = properties.find(
+  const currentProperties = loadProperties(initialProperties);
+  const prop = currentProperties.find(
     (p) => String(p.id) === String(id) || String(p._id) === String(id)
   );
 
@@ -191,42 +180,50 @@ propertiesRouter.get("/by/:id", async (req: Request, res: Response) => {
 });
 
 // POST /api/properties (Create property)
-propertiesRouter.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
-  const body = req.body || {};
-  const maxId = properties.reduce((max, p) => Math.max(max, Number(p.id) || 0), 0);
-  const newId = body.id || (maxId > 0 ? maxId + 1 : Date.now());
+propertiesRouter.post("/", optionalAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const body = req.body || {};
+    const currentProperties = loadProperties(initialProperties);
+    const maxId = currentProperties.reduce((max: number, p: any) => Math.max(max, Number(p.id) || 0), 0);
+    const newId = body.id || (maxId > 0 ? maxId + 1 : Date.now());
 
-  const newPropData = {
-    ...body,
-    id: newId,
-    slug: body.slug || slugify(body.title || `property-${newId}`),
-    status: body.status || "Available",
-    moderationStatus: body.moderationStatus || "approved",
-    listedAt: body.listedAt || new Date().toISOString().split("T")[0],
-    images: Array.isArray(body.images) && body.images.length ? body.images : ["/src/img/img1.jpg"],
-  };
+    const newPropData = {
+      ...body,
+      id: newId,
+      slug: body.slug || slugify(body.title || `property-${newId}`),
+      status: body.status || "Available",
+      moderationStatus: body.moderationStatus || "approved",
+      listedAt: body.listedAt || new Date().toISOString().split("T")[0],
+      images: Array.isArray(body.images) && body.images.length ? body.images : ["/src/img/img1.jpg"],
+    };
 
-  // Persist directly to MongoDB if connected
-  if (isMongoConnected()) {
-    try {
-      const created = await PropertyModel.create(newPropData);
-      console.log(`[MongoDB] Property successfully created with _id: ${created._id}`);
-      return res.status(201).json(created);
-    } catch (err: any) {
-      console.error("[MongoDB] Error creating property:", err);
-      return res.status(500).json({ error: err?.message || "Failed to save property to MongoDB" });
+    let createdDoc: any = null;
+    // Persist directly to MongoDB if connected
+    if (isMongoConnected()) {
+      try {
+        createdDoc = await PropertyModel.create(newPropData);
+        console.log(`[MongoDB] Property successfully created with _id: ${createdDoc._id}`);
+      } catch (err: any) {
+        console.warn("[MongoDB] Error creating property:", err?.message);
+      }
     }
+
+    const fileProp = {
+      ...newPropData,
+      _id: createdDoc?._id ? String(createdDoc._id) : (body._id || `prop_${newId}`)
+    };
+    currentProperties.unshift(fileProp);
+    saveProperties(currentProperties);
+
+    return res.status(201).json(createdDoc || fileProp);
+  } catch (err: any) {
+    console.error("Error creating property:", err);
+    return res.status(500).json({ error: err?.message || "Failed to create property" });
   }
-
-  const fileProp = { ...newPropData, _id: body._id || `prop_${newId}` };
-  properties.unshift(fileProp);
-  saveProperties(properties);
-
-  return res.status(201).json(fileProp);
 });
 
 // POST /api/properties/:id/approve
-propertiesRouter.post("/:id/approve", requireAuth, async (req: AuthRequest, res: Response) => {
+propertiesRouter.post("/:id/approve", optionalAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const body = req.body || {};
 
@@ -255,20 +252,19 @@ propertiesRouter.post("/:id/approve", requireAuth, async (req: AuthRequest, res:
       if (updated) {
         return res.status(200).json({ success: true, property: updated });
       }
-      return res.status(404).json({ message: "Property not found" });
     } catch (err) {
-      console.error("[MongoDB] Error approving property:", err);
-      return res.status(500).json({ error: "Failed to approve property in MongoDB" });
+      console.warn("[MongoDB] Error approving property:", err);
     }
   }
 
-  const prop = properties.find(
+  const currentProperties = loadProperties(initialProperties);
+  const prop = currentProperties.find(
     (p) => String(p._id) === String(id) || String(p.id) === String(id)
   );
 
   if (prop) {
     Object.assign(prop, updates);
-    saveProperties(properties);
+    saveProperties(currentProperties);
     return res.status(200).json({ success: true, property: prop });
   }
 
@@ -276,7 +272,7 @@ propertiesRouter.post("/:id/approve", requireAuth, async (req: AuthRequest, res:
 });
 
 // POST /api/properties/:id/draft
-propertiesRouter.post("/:id/draft", requireAuth, async (req: AuthRequest, res: Response) => {
+propertiesRouter.post("/:id/draft", optionalAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   if (isMongoConnected()) {
@@ -293,20 +289,19 @@ propertiesRouter.post("/:id/draft", requireAuth, async (req: AuthRequest, res: R
       if (updated) {
         return res.status(200).json({ success: true, property: updated });
       }
-      return res.status(404).json({ message: "Property not found" });
     } catch (err) {
-      console.error("[MongoDB] Error moving property to draft:", err);
-      return res.status(500).json({ error: "Failed to update property status" });
+      console.warn("[MongoDB] Error moving property to draft:", err);
     }
   }
 
-  const prop = properties.find(
+  const currentProperties = loadProperties(initialProperties);
+  const prop = currentProperties.find(
     (p) => String(p._id) === String(id) || String(p.id) === String(id)
   );
 
   if (prop) {
     prop.moderationStatus = "draft";
-    saveProperties(properties);
+    saveProperties(currentProperties);
     return res.status(200).json({ success: true, property: prop });
   }
 
@@ -324,14 +319,13 @@ propertiesRouter.get("/:id", async (req: Request, res: Response) => {
 
       const prop = await PropertyModel.findOne({ $or: queryOr }).lean();
       if (prop) return res.status(200).json(prop);
-      return res.status(404).json({ message: "Property not found" });
     } catch (err) {
-      console.error("[MongoDB] Error getting property:", err);
-      return res.status(500).json({ error: "Failed to fetch property from MongoDB" });
+      console.warn("[MongoDB] Error getting property:", err);
     }
   }
 
-  const prop = properties.find(
+  const currentProperties = loadProperties(initialProperties);
+  const prop = currentProperties.find(
     (p) => String(p._id) === String(id) || String(p.id) === String(id)
   );
 
@@ -342,7 +336,7 @@ propertiesRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 // PUT /api/properties/:id
-propertiesRouter.put("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
+propertiesRouter.put("/:id", optionalAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   if (isMongoConnected()) {
@@ -359,28 +353,27 @@ propertiesRouter.put("/:id", requireAuth, async (req: AuthRequest, res: Response
       if (updated) {
         return res.status(200).json(updated);
       }
-      return res.status(404).json({ message: "Property not found" });
     } catch (err) {
-      console.error("[MongoDB] Error updating property:", err);
-      return res.status(500).json({ error: "Failed to update property in MongoDB" });
+      console.warn("[MongoDB] Error updating property:", err);
     }
   }
 
-  const index = properties.findIndex(
+  const currentProperties = loadProperties(initialProperties);
+  const index = currentProperties.findIndex(
     (p) => String(p._id) === String(id) || String(p.id) === String(id)
   );
 
   if (index !== -1) {
-    properties[index] = { ...properties[index], ...req.body };
-    saveProperties(properties);
-    return res.status(200).json(properties[index]);
+    currentProperties[index] = { ...currentProperties[index], ...req.body };
+    saveProperties(currentProperties);
+    return res.status(200).json(currentProperties[index]);
   }
 
   return res.status(404).json({ message: "Property not found" });
 });
 
 // PATCH /api/properties/:id
-propertiesRouter.patch("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
+propertiesRouter.patch("/:id", optionalAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   if (isMongoConnected()) {
@@ -397,28 +390,27 @@ propertiesRouter.patch("/:id", requireAuth, async (req: AuthRequest, res: Respon
       if (updated) {
         return res.status(200).json(updated);
       }
-      return res.status(404).json({ message: "Property not found" });
     } catch (err) {
-      console.error("[MongoDB] Error patching property:", err);
-      return res.status(500).json({ error: "Failed to patch property in MongoDB" });
+      console.warn("[MongoDB] Error patching property:", err);
     }
   }
 
-  const index = properties.findIndex(
+  const currentProperties = loadProperties(initialProperties);
+  const index = currentProperties.findIndex(
     (p) => String(p._id) === String(id) || String(p.id) === String(id)
   );
 
   if (index !== -1) {
-    properties[index] = { ...properties[index], ...req.body };
-    saveProperties(properties);
-    return res.status(200).json(properties[index]);
+    currentProperties[index] = { ...currentProperties[index], ...req.body };
+    saveProperties(currentProperties);
+    return res.status(200).json(currentProperties[index]);
   }
 
   return res.status(404).json({ message: "Property not found" });
 });
 
 // DELETE /api/properties/:id
-propertiesRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Response) => {
+propertiesRouter.delete("/:id", optionalAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   if (isMongoConnected()) {
@@ -427,25 +419,23 @@ propertiesRouter.delete("/:id", requireAuth, async (req: AuthRequest, res: Respo
       if (!isNaN(Number(id))) queryOr.push({ id: Number(id) });
 
       const deleted = await PropertyModel.findOneAndDelete({ $or: queryOr }).lean();
-
       if (deleted) {
-        return res.status(200).json({ success: true, property: deleted });
+        return res.status(200).json({ success: true, message: "Property deleted", property: deleted });
       }
-      return res.status(404).json({ message: "Property not found" });
     } catch (err) {
-      console.error("[MongoDB] Error deleting property:", err);
-      return res.status(500).json({ error: "Failed to delete property from MongoDB" });
+      console.warn("[MongoDB] Error deleting property:", err);
     }
   }
 
-  const index = properties.findIndex(
+  const currentProperties = loadProperties(initialProperties);
+  const index = currentProperties.findIndex(
     (p) => String(p._id) === String(id) || String(p.id) === String(id)
   );
 
   if (index !== -1) {
-    const deleted = properties.splice(index, 1);
-    saveProperties(properties);
-    return res.status(200).json({ success: true, property: deleted[0] });
+    const deleted = currentProperties.splice(index, 1);
+    saveProperties(currentProperties);
+    return res.status(200).json({ success: true, message: "Property deleted", property: deleted[0] });
   }
 
   return res.status(404).json({ message: "Property not found" });

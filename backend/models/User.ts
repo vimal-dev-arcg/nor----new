@@ -34,7 +34,7 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-UserSchema.pre("validate", function (next) {
+UserSchema.pre("validate", function () {
   if (!this.username && this.email) {
     this.username = this.email.split("@")[0];
   } else if (!this.username && this.name) {
@@ -42,7 +42,6 @@ UserSchema.pre("validate", function (next) {
   } else if (!this.username) {
     this.username = "admin";
   }
-  next();
 });
 
 export const UserModel =

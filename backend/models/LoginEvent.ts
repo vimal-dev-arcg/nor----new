@@ -32,13 +32,12 @@ const LoginEventSchema = new Schema<ILoginEvent>(
 );
 
 // Pre-validate hook to make sure username is always set if only email is passed
-LoginEventSchema.pre("validate", function (next) {
+LoginEventSchema.pre("validate", function () {
   if (!this.username && this.email) {
     this.username = this.email.split("@")[0];
   } else if (!this.username) {
     this.username = "admin";
   }
-  next();
 });
 
 export const LoginEventModel =

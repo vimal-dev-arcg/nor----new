@@ -55,9 +55,19 @@ export default function CheckerDashboard() {
   const [reviewKyc, setReviewKyc] = useState(null);
   const [kycRemarks, setKycRemarks] = useState("");
 
-  const [properties, setProperties] = useState([]);
+  const [properties, setProperties] = useState(appStore.getState()?.properties || []);
   const [kycQueue, setKycQueue] = useState([]);
   const [escrowLedger, setEscrowLedger] = useState([]);
+
+  // Subscribe to central reactive appStore
+  useEffect(() => {
+    const unsub = appStore.subscribe((state) => {
+      if (Array.isArray(state?.properties) && state.properties.length > 0) {
+        setProperties(state.properties);
+      }
+    });
+    return unsub;
+  }, []);
 
   // Removed unused await statement outside of async function
 
