@@ -161,6 +161,14 @@ function normalizeUploadPath(v) {
   if (!t) return "";
   if (/^https?:\/\//i.test(t)) return t;
   if (t.startsWith("/uploads/")) return t;
+  if (
+    t.startsWith("/projects/") ||
+    t.startsWith("/floorplans/") ||
+    t.startsWith("/src/") ||
+    t.startsWith("/img/")
+  ) {
+    return t;
+  }
   const name = t.split("?")[0].split("#")[0].split("/").filter(Boolean).pop();
   return name ? `/uploads/${name}` : "";
 }

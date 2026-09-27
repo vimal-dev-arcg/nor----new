@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import express from "express";
 import { backendApp } from "./app";
 import { connectMongoDB } from "./db";
+import { seedMongoIfEmpty } from "./routes/properties";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,7 @@ async function startServer() {
 
   console.log(`[Backend Server] Connecting to MongoDB...`);
   await connectMongoDB();
+  await seedMongoIfEmpty();
 
   // Mount backend API and static files
   app.use(backendApp);

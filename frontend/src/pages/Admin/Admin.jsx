@@ -60,6 +60,14 @@ export default function SuperAdminDashboard() {
   const [store, setStore] = useState(appStore.getState());
   const currentUser = PERSONAS.super_admin;
 
+  // Subscribe to central reactive appStore
+  useEffect(() => {
+    const unsub = appStore.subscribe((state) => {
+      setStore(state);
+    });
+    return unsub;
+  }, []);
+
   // Active Tab: 'approval-broking' | 'telemetry' | 'escrow-ledger' | 'listings' | 'governance'
   const [activeTab, setActiveTab] = useState("approval-broking");
 
@@ -183,25 +191,48 @@ export default function SuperAdminDashboard() {
         const response = await fetch(
           "/api/properties?moderationStatus=pending_admin"
         );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch pending admin listings: ${response.status}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setPendingAdminListings(data);
+          }
         }
-        const data = await response.json();
-        setPendingAdminListings(data);
       } catch (error) {
-        console.error("Failed to fetch pending admin listings:", error.message);
+        console.warn("Notice: Backend pending listings lookup:", error.message);
       }
     }
   
     loadPendingAdminListings();
   }, []);
 
-  // Filter 2-stage approval queues
-  const filteredPendingAdminListings = store.properties.filter(
-    (p) =>
-      p.moderationStatus === "pending_admin" ||
-      (p.checkerApproved && !p.adminApproved)
-  );
+  // Combined Stage 2 pending listings (merges reactive client store and backend MongoDB)
+  const effectivePendingAdminListings = useMemo(() => {
+    const storePending = (store.properties || []).filter(
+      (p) =>
+        p.moderationStatus === "pending_admin" ||
+        (p.checkerApproved === true && !p.adminApproved)
+    );
+
+    const map = new Map();
+    // Add store pending properties
+    storePending.forEach((p) => {
+      const key = String(p.id || p._id);
+      if (key) map.set(key, p);
+    });
+
+    // Merge in backend pending listings if any
+    (pendingAdminListings || []).forEach((p) => {
+      const key = String(p.id || p._id);
+      if (key && !map.has(key)) {
+        map.set(key, p);
+      }
+    });
+
+    return Array.from(map.values());
+  }, [store.properties, pendingAdminListings]);
+
+  // Alias for backward compatibility across tabs and metrics
+  const filteredPendingAdminListings = effectivePendingAdminListings;
 
   const pendingCheckerListings = store.properties.filter(
     (p) =>
@@ -314,34 +345,42 @@ export default function SuperAdminDashboard() {
   async function handleAdminConfirmApproval(e) {
     if (e) e.preventDefault();
     if (!approvalModalProp) return;
-  
+
+    const numBroking = Number(brokingPct) || 5.0;
+    const numAdmin = Number(adminSharePct) || 2.0;
+    const numDealer = Number(dealerSharePct) || 2.0;
+    const numChecker = Number(checkerSharePct) || 1.0;
+    const remarks =
+      adminRemarks ||
+      `Commercial terms cleared by Super Admin at ${numBroking}% broking commission.`;
+
     try {
-      const response = await fetch(
-        `/api/properties/${approvalModalProp.id}/approve`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            brokingPercentage: Number(brokingPct),
-            adminPlatformPct: Number(adminSharePct),
-            dealerCommissionPct: Number(dealerSharePct),
-            checkerEscrowPct: Number(checkerSharePct),
-            remarks:
-              adminRemarks ||
-              `Commercial terms cleared by Super Admin at ${brokingPct}% broking.`,
-          }),
-        }
-      );
-  
-      if (response.ok) {
-        const updatedProperty = await response.json();
-        console.log("Property approved:", updatedProperty);
-        confetti({ particleCount: 70, spread: 80 });
-        setApprovalModalProp(null);
-        refreshDashboardData(); // Refresh the dashboard to reflect the changes
-      } else {
-        console.error("Failed to approve property:", response.statusText);
-      }
+      // 1. Instantly update client store & persist to localStorage
+      appStore.adminApproveListing(approvalModalProp.id, {
+        checkType: "manual",
+        remarks,
+        brokingPercentage: numBroking,
+        adminPlatformPct: numAdmin,
+        dealerCommissionPct: numDealer,
+        checkerEscrowPct: numChecker,
+      });
+
+      // 2. Sync to backend API / MongoDB
+      fetch(`/api/properties/${approvalModalProp.id}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brokingPercentage: numBroking,
+          adminPlatformPct: numAdmin,
+          dealerCommissionPct: numDealer,
+          checkerEscrowPct: numChecker,
+          remarks,
+        }),
+      }).catch((err) => console.log("[Backend Sync] Note:", err));
+
+      confetti({ particleCount: 70, spread: 80 });
+      setApprovalModalProp(null);
+      refreshDashboardData();
     } catch (error) {
       console.error("Error approving property:", error.message);
     }
@@ -621,7 +660,7 @@ export default function SuperAdminDashboard() {
               }`}
             >
               <FaPercent /> Stage 2 Broking & Approvals (
-              {pendingAdminListings.length})
+              {effectivePendingAdminListings.length})
             </button>
 
             <button
@@ -688,13 +727,13 @@ export default function SuperAdminDashboard() {
                 </p>
               </div>
               <span className="text-xs text-amber-300 bg-amber-500/10 px-3.5 py-1.5 rounded-full border border-amber-500/20 font-semibold">
-                {pendingAdminListings.length} Listings Awaiting Admin Broking
+                {effectivePendingAdminListings.length} Listings Awaiting Admin Broking
                 Setup
               </span>
             </div>
 
             {/* QUEUE OF PROPERTIES AWAITING ADMIN APPROVAL */}
-            {pendingAdminListings.length === 0 ? (
+            {effectivePendingAdminListings.length === 0 ? (
               <div className="p-12 text-center bg-slate-900 rounded-3xl border border-slate-800 space-y-3">
                 <FaCheckCircle className="text-emerald-400 text-4xl mx-auto" />
                 <h3 className="text-lg font-bold text-white">
@@ -708,7 +747,7 @@ export default function SuperAdminDashboard() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {pendingAdminListings.map((prop) => (
+                {effectivePendingAdminListings.map((prop) => (
                   <div
                     key={prop.id}
                     className="bg-slate-900 rounded-3xl border border-amber-500/40 overflow-hidden flex flex-col justify-between shadow-2xl group hover:border-[#b3975b] transition"

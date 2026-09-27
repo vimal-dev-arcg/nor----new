@@ -23,6 +23,7 @@ export async function fetchProperties(status = "") {
     return Array.isArray(response.data) ? response.data : [];
   } catch (error) {
     console.warn("fetchProperties notice:", error.message);
+    // Return store properties as fallback
     const state = appStore.getState();
     return state?.properties || [];
   }

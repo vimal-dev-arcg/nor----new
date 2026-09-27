@@ -16,12 +16,34 @@ function slugify(input: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+let hasSeededMongo = false;
+
+export async function seedMongoIfEmpty() {
+  if (!isMongoConnected() || hasSeededMongo) return;
+  try {
+    for (const prop of initialProperties) {
+      const exists = await PropertyModel.findOne({
+        $or: [{ id: prop.id }, { slug: prop.slug }],
+      }).lean();
+      if (!exists) {
+        await PropertyModel.create(prop);
+      }
+    }
+    hasSeededMongo = true;
+    console.log(`[MongoDB] Verified/synced ${initialProperties.length} initial & launch properties.`);
+  } catch (err: any) {
+    console.warn("[MongoDB] Notice during auto-seed:", err?.message);
+  }
+}
+
 // GET /api/properties (Filtered listing)
 propertiesRouter.get("/", async (req: Request, res: Response) => {
   const { status, moderationStatus, location, mode, type, search } = req.query as Record<string, string>;
 
   if (isMongoConnected()) {
     try {
+      await seedMongoIfEmpty();
+
       const query: any = {};
 
       if (status) {
@@ -41,7 +63,24 @@ propertiesRouter.get("/", async (req: Request, res: Response) => {
       }
 
       if (mode) {
-        query.mode = { $regex: new RegExp(`^${mode}$`, "i") };
+        const mLower = mode.toLowerCase();
+        if (mLower === "buy") {
+          query.$or = [
+            { mode: { $regex: /^buy$/i } },
+            { isNewLaunch: true },
+            { status: { $regex: /launch/i } },
+            { type: { $regex: /off-plan/i } },
+          ];
+        } else if (mLower === "sell") {
+          query.$or = [
+            { mode: { $regex: /^sell$/i } },
+            { mode: { $regex: /^buy$/i } },
+            { isNewLaunch: true },
+            { status: { $regex: /launch/i } },
+          ];
+        } else {
+          query.mode = { $regex: new RegExp(`^${mode}$`, "i") };
+        }
       }
 
       if (type) {
@@ -96,9 +135,30 @@ propertiesRouter.get("/", async (req: Request, res: Response) => {
   }
 
   if (mode) {
-    result = result.filter(
-      (p) => p.mode && p.mode.toLowerCase() === mode.toLowerCase()
-    );
+    const mLower = mode.toLowerCase();
+    if (mLower === "buy") {
+      result = result.filter(
+        (p) =>
+          (p.mode && p.mode.toLowerCase() === "buy") ||
+          p.isNewLaunch ||
+          (p.status && p.status.toLowerCase().includes("launch")) ||
+          (p.type && p.type.toLowerCase().includes("off-plan")) ||
+          !p.mode
+      );
+    } else if (mLower === "sell") {
+      result = result.filter(
+        (p) =>
+          (p.mode && p.mode.toLowerCase() === "sell") ||
+          (p.mode && p.mode.toLowerCase() === "buy") ||
+          p.isNewLaunch ||
+          (p.status && p.status.toLowerCase().includes("launch")) ||
+          (p.type && p.type.toLowerCase().includes("off-plan"))
+      );
+    } else {
+      result = result.filter(
+        (p) => p.mode && p.mode.toLowerCase() === mode.toLowerCase()
+      );
+    }
   }
 
   if (type) {

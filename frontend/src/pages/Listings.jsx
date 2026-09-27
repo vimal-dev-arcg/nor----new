@@ -110,9 +110,27 @@ export default function Listings() {
         passMode =
           p.status === "New Launch" ||
           p.type === "Off-Plan" ||
+          p.isNewLaunch ||
           p.status?.toLowerCase().includes("launch");
       } else if (modeFromUrl) {
-        passMode = p.mode === modeFromUrl;
+        // Keep all launch properties in Buy & Sell as well
+        if (modeFromUrl === "Buy") {
+          passMode =
+            p.mode === "Buy" ||
+            p.isNewLaunch ||
+            p.status === "New Launch" ||
+            p.type === "Off-Plan" ||
+            !p.mode;
+        } else if (modeFromUrl === "Sell") {
+          passMode =
+            p.mode === "Sell" ||
+            p.mode === "Buy" ||
+            p.isNewLaunch ||
+            p.status === "New Launch" ||
+            p.type === "Off-Plan";
+        } else {
+          passMode = p.mode === modeFromUrl;
+        }
       }
       const passType = !filters.type || p.type === filters.type;
       const passBeds = !minBeds || Number(p.beds || 0) >= minBeds;
@@ -122,13 +140,20 @@ export default function Listings() {
       if (categoryFromUrl === "Residential") {
         passCategory =
           p.featuredCategory === "Residential" ||
+          p.category === "Residential" ||
           (!p.featuredCategory &&
-            !["Office", "Retail", "Industrial"].includes(p.type));
+            !["Office", "Retail", "Industrial", "Commercial"].includes(p.type));
       } else if (categoryFromUrl === "Commercial") {
         passCategory =
           p.featuredCategory === "Commercial" ||
-          ["Office", "Retail", "Industrial"].includes(p.type) ||
+          p.category === "Commercial" ||
+          ["Office", "Retail", "Industrial", "Commercial"].includes(p.type) ||
           p.type?.toLowerCase().includes("commercial");
+      } else if (categoryFromUrl === "Community") {
+        passCategory =
+          p.featuredCategory === "Community" ||
+          p.category === "Community" ||
+          p.type === "Villa";
       } else if (categoryFromUrl === "Industrial") {
         passCategory =
           p.featuredCategory === "Industrial" ||

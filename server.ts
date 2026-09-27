@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { backendApp } from "./backend/app";
 import { connectMongoDB } from "./backend/db";
+import { seedMongoIfEmpty } from "./backend/routes/properties";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,9 +15,11 @@ async function startServer() {
   const isProd = process.env.NODE_ENV === "production";
 
   // Connect to MongoDB if available (falls back gracefully to JSON storage if offline)
-  connectMongoDB().catch((err) => {
-    console.log("[MongoDB] Deferred initialization notice:", err?.message);
-  });
+  connectMongoDB()
+    .then(() => seedMongoIfEmpty())
+    .catch((err) => {
+      console.log("[MongoDB] Deferred initialization notice:", err?.message);
+    });
 
   // 1. Mount backend API and static uploads
   app.use(backendApp);
